@@ -1,6 +1,6 @@
 [package]
 name = "hackgproject"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Michael Eden <themichaeleden@gmail.com>"]
 
 [dependencies]
