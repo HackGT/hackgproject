@@ -1,0 +1,12 @@
+[package]
+name = "hackgproject"
+version = "0.1.0"
+authors = ["Michael Eden <themichaeleden@gmail.com>"]
+
+[dependencies]
+rustache = "0.1"
+
+[dependencies.clap]
+version = "2.25"
+features = ["yaml"]
+

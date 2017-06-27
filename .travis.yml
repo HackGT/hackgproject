@@ -1,0 +1,15 @@
+os:
+- linux
+- osx
+language: rust
+rust:
+- 1.17.0
+script:
+- cargo build --verbose --release
+deploy:
+  provider: releases
+  api_key:
+    secure: N9EzQhy6gkPEWqE1dh/TWUr52H0SXPD6eue7d45QJQ5/S62c33xL6BvNpVnZ2zeMTwsLM0j17Ce+kkCKHtWpIZOY00pnLLwCASgsmFP/XUEzNfeHWkKJRAC2MYuKdz+gF4UyPI7AYlvrshVmC1rnKWOX1AgjP9ONOFoY1HYFOxAf3rnNVRzf881BHmHXWxLd50cvaOACTUI/e1WJSIP8tbh7JZZTb7VSLwXvxLJ5I2mvFqsQs3HnkH5/u+HWpTp6rWvX4vDElMuT18wFPwH0aYo4FoI8oTUUToe9lUYyv+oIc1LzcL4OZ0/NoyV1uP7RnMekJC478qP+btcOMEtbBWGYYCAo35Q37oLQjnFylVhpzXOwEchMdeZLkNpyw4hbmmF79o8SCnmZHMeAnWNlMxAgRm6ocIqJRoJLgrITFInEr1Y+EZUnUHtVEb6pGpoVI3h/hnFSBbQwOUYX/7n3w+BnZneYaBmwSce6Il5PrwQc6ZKIcthkiMdN7/wMq1sOwpAFbJCK4aHcHO7ynKuK833jXjI4+qtxXMu6HBApZzIRTWnr6ZvEu2ivF1MReJ70nCDbuHbI4cunzWKkUIpLkS2QJQSoT3IMEbwPYkAo+8UTUMhALfPusjCWRqf91BncUBIxI1TV0JQ5NOQG1KtVl38/XHjYhMvEMNcj6hGzKYM=
+  file: target/release/hackgproject
+  on:
+    repo: HackGT/hackgproject

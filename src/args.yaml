@@ -1,0 +1,11 @@
+name: hackgproject
+version: 0.1.0
+author: Michael Eden <themichaeleden@gmail.com>
+subcommands:
+  - init:
+      about: Update/Create HakGT boilerplate
+      args:
+        - PATH:
+            help: The project\'s path.
+            required: false
+            index: 1
