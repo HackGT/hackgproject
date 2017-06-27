@@ -50,6 +50,21 @@ publish_project_container() {
     docker push "$push_image_name"
 }
 
+trigger_biodomes_build() {
+    body='{
+    "request": {
+    "branch":"master"
+    } }'
+
+    curl -s -X POST \
+       -H "Content-Type: application/json" \
+       -H "Accept: application/json" \
+       -H "Travis-API-Version: 3" \
+       -H "Authorization: token ${TRAVIS_TOKEN}" \
+       -d "$body" \
+       https://api.travis-ci.org/repo/HackGT%2Fbiodomes/requests
+}
+
 
 build_project_source
 test_project_source
@@ -57,5 +72,6 @@ build_project_container
 
 if [[ ${TRAVIS_BRANCH:-} = master && ${TRAVIS_PULL_REQUEST-} = false ]]; then
     publish_project_container
+    trigger_biodomes_build
 fi
 
