@@ -2,7 +2,7 @@
 A CLI to create and manage projects that work with our infra.
 
 ```bash
-hackgproject 0.1.5
+hackgproject 0.1.6
 Michael Eden <themichaeleden@gmail.com>
 
 USAGE:
@@ -14,6 +14,6 @@ FLAGS:
 
 SUBCOMMANDS:
     help    Prints this message or the help of the given subcommand(s)
-    init    Update/Create HakGT boilerplate
-    test    Test the travis-ci build.
+    init    Update/Create HackGT boilerplate
+    test    Test the travis-ci build and build your docker image.
 ```

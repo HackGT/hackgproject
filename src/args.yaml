@@ -1,9 +1,9 @@
 name: hackgproject
-version: 0.1.5
+version: 0.1.6
 author: Michael Eden <themichaeleden@gmail.com>
 subcommands:
   - test:
-      about: Test the travis-ci build.
+      about: Test the travis-ci build and build your docker image.
   - init:
       about: Update/Create HackGT boilerplate
       args:
