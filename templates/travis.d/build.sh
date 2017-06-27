@@ -18,7 +18,8 @@ else
     docker='sudo docker'
 fi
 
-image_name=$(basename "$(pwd)")
+remote=$(git remote -v | grep -Po 'HackGT/[a-zA-Z0-9-_\.]*' | head -1)
+image_name=$(basename "${remote%.*}")
 
 build_project_source() {
     if [[ -f Dockerfile.build ]]; then
