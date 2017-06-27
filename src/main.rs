@@ -5,10 +5,10 @@ extern crate rustache;
 use std::io::Write;
 use std::env;
 use std::fs::{self, File};
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 
 use clap::App;
-
 use rustache::{HashBuilder, Render};
 
 const GIT_REV: &'static str = include_str!("../.git/refs/heads/master");
@@ -25,6 +25,7 @@ fn main() {
 
     match matches.subcommand() {
         ("init", Some(a)) => init(a.value_of("PATH")),
+        ("test", Some(_)) => test(),
 
         _ => {
             writeln!(&mut std::io::stderr(),
@@ -33,6 +34,26 @@ fn main() {
         },
 
     }
+}
+
+fn get_project_root() -> Option<PathBuf> {
+    fn check(path: &PathBuf) -> bool {
+        let paths = fs::read_dir(path).unwrap();
+        for path in paths {
+            if path.unwrap().file_name().to_str().unwrap() == ".travis.d" {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    let mut current_dir = env::current_dir().unwrap();
+    while !check(&current_dir) {
+        if !current_dir.pop() {
+            return None;
+        }
+    }
+    Some(current_dir)
 }
 
 fn init(path: Option<&str>) {
@@ -74,4 +95,40 @@ fn init(path: Option<&str>) {
         You're almost up and running!\n\
         Head over to https://travis-ci.org/profile/HackGT\n\
         and enable travis for this repository to get started!");
+}
+
+fn get_build_script() -> PathBuf {
+    let mut root = match get_project_root() {
+        Some(r) => r,
+        None => {
+            println!("Could not find build files.\n\
+                      Are you sure you ran `hackgproject init`?");
+            ::std::process::exit(64);
+        }
+    };
+
+    root.push(".travis.d/build.sh");
+
+    // check if path exists, if not create it.
+    if fs::metadata(&root).is_err() {
+        println!("Could not find build files.\n\
+                  Are you sure you ran `hackgproject init`?");
+        ::std::process::exit(64);
+    }
+
+    return root;
+}
+
+fn test() {
+    let build_script = get_build_script();
+    let root = get_project_root().unwrap();
+    env::set_current_dir(&root).unwrap();
+
+    let status = Command::new(build_script.to_str().unwrap())
+        .spawn()
+        .expect("Failed to run the build script.")
+        .wait()
+        .unwrap();
+
+    ::std::process::exit(status.code().unwrap());
 }

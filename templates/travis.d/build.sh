@@ -10,9 +10,11 @@ if ! hash docker &>/dev/null; then
     echo "Cannot find `docker`!" >&2
     exit 64
 fi
+
+docker=
 if docker ps &>/dev/null; then
     docker=docker
-elif sudo docker ps &>/dev/null; then
+else
     docker='sudo docker'
 fi
 
