@@ -32,6 +32,7 @@ app `badger` so we can have a cute mascot in the future. Just run:
 
 ```bash
 $ hackgproject init badger
+
 "badger" does not exist, creating it.
 Initialized empty Git repository in ~/hackgt/hackgproject/badger/.git/
 Writing '.travis.d/build.sh'.
@@ -51,11 +52,10 @@ HackGT's infra: https://travis-ci.org/HackGT/travis-secrets-setter
 
 This sets up all the stuff you'll need for a local HackGT repo.
 
-We use travis to deploy and test our services, to take advantage of this,
-upload the created repo to GitHub.
 The last step is hitting `Restart Build`
 [here](https://travis-ci.org/HackGT/travis-secrets-setter).
-This is a travis job that integrates your new repo into our infra.
+This is a travis job that integrates your new repo into our infra,
+you'll get automated testing and deployment under `badger.dev.hack.gt`!
 
 Have fun and happy hacking!
 
