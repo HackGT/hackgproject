@@ -69,4 +69,9 @@ fn init(path: Option<&str>) {
         let mut file = File::create(path).unwrap();
         data.render(text, &mut file).unwrap();
     }
+
+    println!("\n\
+        You're almost up and running!\n\
+        Head over to https://travis-ci.org/profile/HackGT\n\
+        and enable travis for this repository to get started!");
 }
