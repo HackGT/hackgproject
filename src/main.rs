@@ -4,7 +4,8 @@ extern crate rustache;
 
 use std::io::Write;
 use std::env;
-use std::fs::{self, File};
+use std::fs::{self, File, Permissions};
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -15,12 +16,12 @@ const REPO: &'static str = "HackGT";
 
 const GIT_REV: &'static str = include_str!("../.git/refs/heads/master");
 
-const FILES: [(&'static str, &'static str); 5] = [
-    (include_str!("../templates/travis.d/build.sh"), ".travis.d/build.sh"),
-    (include_str!("../templates/travis.yml"), ".travis.yml"),
-    (include_str!("../templates/gitignore"), ".gitignore"),
-    (include_str!("../templates/LICENSE"), "LICENSE"),
-    (include_str!("../templates/README.md"), "README.md"),
+const FILES: [(&'static str, &'static str, u32); 5] = [
+    (include_str!("../templates/travis.d/build.sh"), ".travis.d/build.sh", 0o775),
+    (include_str!("../templates/travis.yml"), ".travis.yml", 0o664),
+    (include_str!("../templates/gitignore"), ".gitignore", 0o664),
+    (include_str!("../templates/LICENSE"), "LICENSE", 0o664),
+    (include_str!("../templates/README.md"), "README.md", 0o664),
 ];
 
 fn main() {
@@ -105,12 +106,13 @@ fn init(path: Option<&str>) {
         .insert("app_name", format!("{}", basename))
         .insert("app_repo", format!("{}/{}", REPO, basename));
 
-    for &(text, path) in FILES.iter() {
+    for &(text, path, perm) in FILES.iter() {
         println!("Writing '{}'.", path);
         let path = Path::new(path);
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         let mut file = File::create(path).unwrap();
         data.render(text, &mut file).unwrap();
+        fs::set_permissions(path, Permissions::from_mode(perm)).unwrap();
     }
 
     println!("\n\
