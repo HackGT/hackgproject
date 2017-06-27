@@ -5,6 +5,7 @@ language: rust
 rust:
 - 1.17.0
 script:
+- mkdir -p '.git/refs/heads' && echo "$TRAVIS_COMMIT" > '.git/refs/heads/master'
 - cargo build --verbose --release
 - mv 'target/release/hackgproject' "target/release/hackgproject-$(uname -s | tr '[:upper:]' '[:lower:]')"
 deploy:
