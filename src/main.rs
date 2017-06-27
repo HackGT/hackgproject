@@ -16,12 +16,21 @@ const REPO: &'static str = "HackGT";
 
 const GIT_REV: &'static str = include_str!("../.git/refs/heads/master");
 
-const FILES: [(&'static str, &'static str, u32); 5] = [
-    (include_str!("../templates/travis.d/build.sh"), ".travis.d/build.sh", 0o775),
-    (include_str!("../templates/travis.yml"), ".travis.yml", 0o664),
-    (include_str!("../templates/gitignore"), ".gitignore", 0o664),
-    (include_str!("../templates/LICENSE"), "LICENSE", 0o664),
-    (include_str!("../templates/README.md"), "README.md", 0o664),
+const FILES: [(&'static str, &'static str, u32, bool); 5] = [
+    (include_str!("../templates/travis.d/build.sh"),
+        ".travis.d/build.sh", 0o775, true),
+
+    (include_str!("../templates/travis.yml"),
+        ".travis.yml", 0o664, true),
+
+    (include_str!("../templates/gitignore"),
+        ".gitignore", 0o664, false),
+
+    (include_str!("../templates/LICENSE"),
+        "LICENSE", 0o664, false),
+
+    (include_str!("../templates/README.md"),
+        "README.md", 0o664, false),
 ];
 
 fn main() {
@@ -106,7 +115,10 @@ fn init(path: Option<&str>) {
         .insert("app_name", format!("{}", basename))
         .insert("app_repo", format!("{}/{}", REPO, basename));
 
-    for &(text, path, perm) in FILES.iter() {
+    for &(text, path, perm, overwrite) in FILES.iter() {
+        if !overwrite && fs::metadata(&path).is_ok() {
+            continue;
+        }
         println!("Writing '{}'.", path);
         let path = Path::new(path);
         fs::create_dir_all(path.parent().unwrap()).unwrap();
@@ -116,9 +128,15 @@ fn init(path: Option<&str>) {
     }
 
     println!("\n\
-        You're almost up and running!\n\
-        Head over to https://travis-ci.org/profile/HackGT\n\
-        and enable travis for this repository to get started!");
+        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n\
+        ┃ You're almost up and running! Just a few more steps: ┃\n\
+        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n\
+        \n\
+        1. Create this repo on GitHub: https://github.com/HackGT/\
+        \n\
+        2. Hit 'Restart Build' to get your project set up with all of\n\
+        HackGT's infra: https://travis-ci.org/HackGT/travis-secrets-setter\n\
+        ");
 }
 
 fn get_build_script() -> PathBuf {
