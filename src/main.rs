@@ -11,11 +11,16 @@ use std::process::Command;
 use clap::App;
 use rustache::{HashBuilder, Render};
 
+const REPO: &'static str = "HackGT";
+
 const GIT_REV: &'static str = include_str!("../.git/refs/heads/master");
 
-const FILES: [(&'static str, &'static str); 2] = [
+const FILES: [(&'static str, &'static str); 5] = [
     (include_str!("../templates/travis.d/build.sh"), ".travis.d/build.sh"),
     (include_str!("../templates/travis.yml"), ".travis.yml"),
+    (include_str!("../templates/gitignore"), ".gitignore"),
+    (include_str!("../templates/LICENSE"), "LICENSE"),
+    (include_str!("../templates/README.md"), "README.md"),
 ];
 
 fn main() {
@@ -36,11 +41,11 @@ fn main() {
     }
 }
 
-fn get_project_root() -> Option<PathBuf> {
-    fn check(path: &PathBuf) -> bool {
+fn get_root(marker: &str) -> Option<PathBuf> {
+    fn check(path: &PathBuf, marker: &str) -> bool {
         let paths = fs::read_dir(path).unwrap();
         for path in paths {
-            if path.unwrap().file_name().to_str().unwrap() == ".travis.d" {
+            if path.unwrap().file_name().to_str().unwrap() == marker {
                 return true;
             }
         }
@@ -48,7 +53,7 @@ fn get_project_root() -> Option<PathBuf> {
     }
 
     let mut current_dir = env::current_dir().unwrap();
-    while !check(&current_dir) {
+    while !check(&current_dir, marker) {
         if !current_dir.pop() {
             return None;
         }
@@ -63,8 +68,8 @@ fn init(path: Option<&str>) {
     };
 
     // check if path exists, if not create it.
-    match fs::metadata(&path) {
-        Ok(ref m) if m.is_dir() => {},
+    let created = match fs::metadata(&path) {
+        Ok(ref m) if m.is_dir() => false,
         Ok(_) => {
             writeln!(&mut std::io::stderr(),
                      "{:?} exists and it not a directory!", path).ok();
@@ -73,15 +78,32 @@ fn init(path: Option<&str>) {
         Err(_) => {
             println!("{:?} does not exist, creating it.", path);
             fs::create_dir_all(&path).unwrap();
+            true
         },
-    }
+    };
 
     // easier if we just change to this dir
     env::set_current_dir(&path).unwrap();
+    let absolute_path = env::current_dir().unwrap();
+
+    // do a quit `git init`
+    if created || get_root(".git").is_none() {
+        Command::new("git")
+            .args(&["init"])
+            .spawn()
+            .expect("Failed to run `git init`!")
+            .wait()
+            .unwrap();
+    }
+
+    let basename = absolute_path.components()
+        .last().unwrap().as_os_str().to_str().unwrap();
 
     // add all the files:
     let data = HashBuilder::new()
-        .insert("source_rev", GIT_REV);
+        .insert("source_rev", GIT_REV)
+        .insert("app_name", format!("{}", basename))
+        .insert("app_repo", format!("{}/{}", REPO, basename));
 
     for &(text, path) in FILES.iter() {
         println!("Writing '{}'.", path);
@@ -98,7 +120,7 @@ fn init(path: Option<&str>) {
 }
 
 fn get_build_script() -> PathBuf {
-    let mut root = match get_project_root() {
+    let mut root = match get_root(".travis.d") {
         Some(r) => r,
         None => {
             println!("Could not find build files.\n\
@@ -121,7 +143,7 @@ fn get_build_script() -> PathBuf {
 
 fn test() {
     let build_script = get_build_script();
-    let root = get_project_root().unwrap();
+    let root = get_root(".travis.d").unwrap();
     env::set_current_dir(&root).unwrap();
 
     let status = Command::new(build_script.to_str().unwrap())
