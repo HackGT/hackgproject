@@ -17,3 +17,9 @@ SUBCOMMANDS:
     init    Update/Create HackGT boilerplate
     test    Test the travis-ci build and build your docker image.
 ```
+
+## Install!
+
+This package comes as a single binary with no dependencies for osx/linux
+[here](https://github.com/HackGT/hackgproject/releases/latest).
+
