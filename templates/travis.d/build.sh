@@ -95,20 +95,24 @@ set_cloudflare_dns() {
     local name="$2"
     local content="$3"
     local proxied="$4"
+    local type_downcase=$(echo ${type} | tr '[:upper:]' '[:lower:]')
+    local name_downcase=$(echo ${name} | tr '[:upper:]' '[:lower:]')
+    local content_downcase=$(echo ${content} | tr '[:upper:]' '[:lower:]')
 
     # get all the dns records
     local dns_records=$(curl -X GET \
           -H "X-Auth-Email: ${CLOUDFLARE_EMAIL}" \
           -H "X-Auth-Key: ${CLOUDFLARE_AUTH}" \
           -H "Content-Type: application/json" \
-          "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE}/dns_records")
+          "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE}/dns_records" \
+          | tr '[:upper:]' '[:lower:]')
 
     # Check if we already set it
     local jq_exists=$(cat <<-END
         .result[]
-        | select(.type == "${type}")
-        | select(.name == "${name}")
-        | select(.content == "${content}")
+        | select(.type == "${type_downcase}")
+        | select(.name == "${name_downcase}")
+        | select(.content == "${content_downcase}")
 END
     )
     if [[ -n $(echo "${dns_records}" | jq "${jq_exists}") ]]; then
@@ -118,7 +122,7 @@ END
 
     # Check if there's a different one already set
     local duplicate_exists=$(echo "${dns_records}" \
-        | jq '.result[] | select(.name == "${name}")')
+        | jq '.result[] | select(.name == "${name_downcase}")')
     if [[ -n $duplicate_exists ]]; then
         echo "Record with the same host exists, will not overwrite!"
         exit 64
