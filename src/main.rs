@@ -120,6 +120,17 @@ fn init(matches: &ArgMatches, path: Option<&str>) {
     } else {
         init_deployment();
     }
+
+    println!("\n\
+              ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n\
+              ┃ You're almost up and running! Just a few more steps: ┃\n\
+              ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n\
+              \n\
+              1. Create this repo on GitHub: https://github.com/HackGT/\
+              \n\
+              2. Hit 'Restart Build' to get your project set up with all of\n\
+              HackGT's infra: https://travis-ci.org/HackGT/travis-secrets-setter\n\
+              ");
 }
 
 fn init_static() {
@@ -141,9 +152,11 @@ fn init_static() {
     // add all the files:
     let data = HashBuilder::new()
         .insert("project_type", "static")
+        .insert("use_docker", false)
+        .insert("org_name", REPO)
         .insert("namespace", "dev")
         .insert("root_domain", ROOT_DOMAIN)
-        .insert("source_rev", GIT_REV)
+        .insert("source_rev", GIT_REV.trim())
         .insert("app_name", format!("{}", basename))
         .insert("app_repo", format!("{}/{}", REPO, basename));
 
@@ -155,9 +168,6 @@ fn init_static() {
         .expect("Failed to switch to gh-pages branch!")
         .wait()
         .unwrap();
-
-    println!("\nJust push and go to https://{}.static.{} !",
-             basename, ROOT_DOMAIN);
 }
 
 fn init_deployment() {
@@ -176,24 +186,15 @@ fn init_deployment() {
     // add all the files:
     let data = HashBuilder::new()
         .insert("project_type", "deployment")
+        .insert("use_docker", true)
+        .insert("org_name", REPO)
         .insert("namespace", "static")
         .insert("root_domain", ROOT_DOMAIN)
-        .insert("source_rev", GIT_REV)
+        .insert("source_rev", GIT_REV.trim())
         .insert("app_name", format!("{}", basename))
         .insert("app_repo", format!("{}/{}", REPO, basename));
 
     gen_files(&files, &data);
-
-    println!("\n\
-        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n\
-        ┃ You're almost up and running! Just a few more steps: ┃\n\
-        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n\
-        \n\
-        1. Create this repo on GitHub: https://github.com/HackGT/\
-        \n\
-        2. Hit 'Restart Build' to get your project set up with all of\n\
-        HackGT's infra: https://travis-ci.org/HackGT/travis-secrets-setter\n\
-        ");
 }
 
 fn gen_files(files: &[Template], data: &HashBuilder) {

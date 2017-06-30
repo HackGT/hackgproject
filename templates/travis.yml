@@ -1,13 +1,22 @@
-sudo: required
 dist: trusty
 
+{{#use_docker}}
+sudo: required
 services:
   - docker
+{{/use_docker}}
 
 script:
   - .travis.d/build.sh
 
 env:
   global:
-    - DOCKER_ID_USER="hackgt"
+    - HACKGPROJECT_REV="{{source_rev}}"
+{{#use_docker}}
+    - DOCKER_ID_USER="{{org_name}}"
+{{/use_docker}}
 
+branches:
+  only:
+    - gh-pages
+    - /.*/
