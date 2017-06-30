@@ -1,5 +1,5 @@
 name: hackgproject
-version: 0.1.10
+version: 0.1.11
 author: Michael Eden <themichaeleden@gmail.com>
 subcommands:
   - test:
