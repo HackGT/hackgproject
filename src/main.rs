@@ -9,29 +9,35 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use clap::App;
+use clap::{App, ArgMatches};
 use rustache::{HashBuilder, Render};
 
+type Template = (&'static str, &'static str, u32, bool);
+
 const REPO: &'static str = "HackGT";
-
 const GIT_REV: &'static str = include_str!("../.git/refs/heads/master");
+const ROOT_DOMAIN: &'static str = "hack.gt";
 
-const FILES: [(&'static str, &'static str, u32, bool); 5] = [
-    (include_str!("../templates/travis.d/build.sh"),
-        ".travis.d/build.sh", 0o775, true),
+const TRAVIS_BUILD: Template =
+    (include_str!("../templates/travis.d/build.sh"), ".travis.d/build.sh", 0o775, true);
 
-    (include_str!("../templates/travis.yml"),
-        ".travis.yml", 0o664, true),
+const TRAVIS_META: Template =
+    (include_str!("../templates/travis.yml"), ".travis.yml", 0o664, true);
 
-    (include_str!("../templates/gitignore"),
-        ".gitignore", 0o664, false),
+const GITIGNORE: Template =
+    (include_str!("../templates/gitignore"), ".gitignore", 0o664, false);
 
-    (include_str!("../templates/LICENSE"),
-        "LICENSE", 0o664, false),
+const LICENSE: Template =
+    (include_str!("../templates/LICENSE"), "LICENSE", 0o664, false);
 
-    (include_str!("../templates/README.md"),
-        "README.md", 0o664, false),
-];
+const README: Template =
+    (include_str!("../templates/README.md"), "README.md", 0o664, false);
+
+const CNAME: Template =
+    (include_str!("../templates/CNAME"), "CNAME", 0o664, false);
+
+const INDEX_HTML: Template =
+    (include_str!("../templates/index.html"), "index.html", 0o664, false);
 
 fn main() {
     // get command line args
@@ -39,7 +45,7 @@ fn main() {
     let matches = App::from_yaml(args_config).get_matches();
 
     match matches.subcommand() {
-        ("init", Some(a)) => init(a.value_of("PATH")),
+        ("init", Some(a)) => init(a, a.value_of("PATH")),
         ("test", Some(_)) => test(),
 
         _ => {
@@ -47,7 +53,6 @@ fn main() {
                      "No such command, try using --help.").ok();
             ::std::process::exit(64);
         },
-
     }
 }
 
@@ -71,7 +76,7 @@ fn get_root(marker: &str) -> Option<PathBuf> {
     Some(current_dir)
 }
 
-fn init(path: Option<&str>) {
+fn init(matches: &ArgMatches, path: Option<&str>) {
     let path = match path {
         Some(p) => Path::new(p).to_path_buf(),
         None => env::current_dir().unwrap(),
@@ -94,7 +99,6 @@ fn init(path: Option<&str>) {
 
     // easier if we just change to this dir
     env::set_current_dir(&path).unwrap();
-    let absolute_path = env::current_dir().unwrap();
 
     // do a quit `git init`
     if created || get_root(".git").is_none() {
@@ -106,26 +110,79 @@ fn init(path: Option<&str>) {
             .unwrap();
     }
 
+    // what do we want to make?
+    if matches.is_present("static") {
+        init_static();
+    } else if matches.is_present("jekyll") {
+        unimplemented!();
+    } else if matches.is_present("node") {
+        unimplemented!();
+    } else {
+        init_deployment();
+    }
+}
+
+fn init_static() {
+    println!("Creating a static HTML project!");
+    let files = [
+        TRAVIS_BUILD,
+        TRAVIS_META,
+        GITIGNORE,
+        LICENSE,
+        README,
+        CNAME,
+        INDEX_HTML,
+    ];
+
+    let absolute_path = env::current_dir().unwrap();
     let basename = absolute_path.components()
         .last().unwrap().as_os_str().to_str().unwrap();
 
     // add all the files:
     let data = HashBuilder::new()
+        .insert("project_type", "static")
+        .insert("namespace", "dev")
+        .insert("root_domain", ROOT_DOMAIN)
         .insert("source_rev", GIT_REV)
         .insert("app_name", format!("{}", basename))
         .insert("app_repo", format!("{}/{}", REPO, basename));
 
-    for &(text, path, perm, overwrite) in FILES.iter() {
-        if !overwrite && fs::metadata(&path).is_ok() {
-            continue;
-        }
-        println!("Writing '{}'.", path);
-        let path = Path::new(path);
-        fs::create_dir_all(path.parent().unwrap()).unwrap();
-        let mut file = File::create(path).unwrap();
-        data.render(text, &mut file).unwrap();
-        fs::set_permissions(path, Permissions::from_mode(perm)).unwrap();
-    }
+    gen_files(&files, &data);
+
+    Command::new("git")
+        .args(&["checkout", "-B", "gh-pages"])
+        .spawn()
+        .expect("Failed to switch to gh-pages branch!")
+        .wait()
+        .unwrap();
+
+    println!("\nJust push and go to https://{}.static.{} !",
+             basename, ROOT_DOMAIN);
+}
+
+fn init_deployment() {
+    println!("Creating a Docker deployment project!");
+    let files = [
+        TRAVIS_BUILD,
+        TRAVIS_META,
+        GITIGNORE,
+        LICENSE,
+        README,
+    ];
+    let absolute_path = env::current_dir().unwrap();
+    let basename = absolute_path.components()
+        .last().unwrap().as_os_str().to_str().unwrap();
+
+    // add all the files:
+    let data = HashBuilder::new()
+        .insert("project_type", "deployment")
+        .insert("namespace", "static")
+        .insert("root_domain", ROOT_DOMAIN)
+        .insert("source_rev", GIT_REV)
+        .insert("app_name", format!("{}", basename))
+        .insert("app_repo", format!("{}/{}", REPO, basename));
+
+    gen_files(&files, &data);
 
     println!("\n\
         ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n\
@@ -137,6 +194,20 @@ fn init(path: Option<&str>) {
         2. Hit 'Restart Build' to get your project set up with all of\n\
         HackGT's infra: https://travis-ci.org/HackGT/travis-secrets-setter\n\
         ");
+}
+
+fn gen_files(files: &[Template], data: &HashBuilder) {
+    for &(text, path, perm, overwrite) in files.iter() {
+        if !overwrite && fs::metadata(&path).is_ok() {
+            continue;
+        }
+        println!("Writing '{}'.", path);
+        let path = Path::new(path);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        let mut file = File::create(path).unwrap();
+        data.render(text, &mut file).unwrap();
+        fs::set_permissions(path, Permissions::from_mode(perm)).unwrap();
+    }
 }
 
 fn get_build_script() -> PathBuf {

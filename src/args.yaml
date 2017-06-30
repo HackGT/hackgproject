@@ -1,5 +1,5 @@
 name: hackgproject
-version: 0.1.9
+version: 0.1.10
 author: Michael Eden <themichaeleden@gmail.com>
 subcommands:
   - test:
@@ -7,7 +7,23 @@ subcommands:
   - init:
       about: Update/Create HackGT boilerplate
       args:
+        - deployment:
+            short: d
+            long: deployment
+            help: Create a new project to make a web service [default].
+        - jekyll:
+            short: j
+            long: jekyll
+            help: Create a new jekyll project [coming soon].
+        - node:
+            short: 'n'
+            long: node
+            help: Create a new nodejs project (Ryan Stack) [coming soon].
+        - static:
+            short: s
+            long: static
+            help: Create a new project containing static HTML.
         - PATH:
-            help: The project\'s path.
+            help: "The project's path."
             required: false
             index: 1
