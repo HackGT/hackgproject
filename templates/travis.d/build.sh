@@ -45,11 +45,16 @@ build_project_container() {
 
 publish_project_container() {
     local git_rev=$(git rev-parse HEAD)
+    local branch=$(git rev-parse --abbrev-ref HEAD)
+    local latest_tag_name="latest"
     local push_image_name="${DOCKER_ID_USER}/${image_name}"
+    if [[ $branch != master ]]; then
+        latest_tag_name="latest-${branch}"
+    fi
     docker login -u="${DOCKER_ID_USER}" -p="${DOCKER_PASSWORD}"
     docker tag "$image_name" "$push_image_name":"$git_rev"
     docker push "$push_image_name"
-    docker tag "$push_image_name":"$git_rev" "$push_image_name":latest
+    docker tag "$push_image_name":"$git_rev" "$push_image_name":"$latest_tag_name"
     docker push "$push_image_name"
 }
 
@@ -160,7 +165,7 @@ deployment_project() {
     test_project_source
     build_project_container
 
-    if [[ ${TRAVIS_BRANCH:-} = master && ${TRAVIS_PULL_REQUEST:-} = false ]]; then
+    if [[ ${TRAVIS_PULL_REQUEST:-} = false ]]; then
         publish_project_container
         trigger_biodomes_build
     fi
