@@ -14,7 +14,7 @@ use rustache::{HashBuilder, Render};
 
 type Template = (&'static str, &'static str, u32, bool);
 
-const REPO: &'static str = "HackGT";
+const REPO: &'static str = "hackgt";
 const GIT_REV: &'static str = include_str!("../.git/refs/heads/master");
 const ROOT_DOMAIN: &'static str = "hack.gt";
 
