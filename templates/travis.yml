@@ -15,8 +15,3 @@ env:
 {{#use_docker}}
     - DOCKER_ID_USER="{{org_name}}"
 {{/use_docker}}
-
-branches:
-  only:
-    - gh-pages
-    - /.*/
