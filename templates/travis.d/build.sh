@@ -88,7 +88,7 @@ commit_to_branch() {
     git config user.name 'Michael Eden'
     git config user.email 'themichaeleden@gmail.com'
     git fetch origin
-    git reset "origin/$branch"
+    git reset "origin/$branch" || git checkout -b "$branch"
     git add -A .
     git status
     git commit -m "Automatic Travis deploy of ${git_rev}."
@@ -174,11 +174,10 @@ deployment_project() {
 static_project() {
     # If there's anything we want to do to build it,
     # do it now. (if we're using something other than jekyll)
-    if [[ -f build.sh ]]; then
-        ./build.sh
-    fi
+    build_project_source
 
-    if [[ ${TRAVIS_BRANCH:-} = gh-pages && ${TRAVIS_PULL_REQUEST:-} = false ]]; then
+    if [[ ${TRAVIS_BRANCH:-} = master && ${TRAVIS_PULL_REQUEST:-} = false ]]; then
+        commit_to_branch 'gh-pages'
         set_cloudflare_dns CNAME "$(cat CNAME)" "${ORG_NAME}.github.io" true
     fi
 }
