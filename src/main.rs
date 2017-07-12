@@ -152,7 +152,7 @@ fn init_static() {
     // add all the files:
     let data = HashBuilder::new()
         .insert("project_type", "static")
-        .insert("use_docker", false)
+        .insert("use_docker", true)
         .insert("org_name", REPO)
         .insert("namespace", "dev")
         .insert("root_domain", ROOT_DOMAIN)
