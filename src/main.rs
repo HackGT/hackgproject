@@ -161,13 +161,6 @@ fn init_static() {
         .insert("app_repo", format!("{}/{}", REPO, basename));
 
     gen_files(&files, &data);
-
-    Command::new("git")
-        .args(&["checkout", "-B", "gh-pages"])
-        .spawn()
-        .expect("Failed to switch to gh-pages branch!")
-        .wait()
-        .unwrap();
 }
 
 fn init_deployment() {
