@@ -28,6 +28,7 @@ build_project_source() {
         local build_image_name="$(basename $(pwd))-build"
         $docker build -f Dockerfile.build --rm -t "$build_image_name" .
         $docker run -w '/src' -v "$(pwd):/src" "$build_image_name"
+        sudo chown -R $(id -u):$(id -g) .
     fi
 }
 
@@ -36,6 +37,7 @@ test_project_source() {
         local test_image_name="$(basename $(pwd))-test"
         $docker build -f Dockerfile.test --rm -t "$test_image_name" .
         $docker run -w '/src' -v "$(pwd):/src" "$test_image_name"
+        sudo chown -R $(id -u):$(id -g) .
     fi
 }
 
