@@ -87,6 +87,9 @@ commit_to_branch() {
     local git_rev=$(git rev-parse --short HEAD)
     git config user.name 'Michael Eden'
     git config user.email 'themichaeleden@gmail.com'
+    git remote remove origin
+    git remote add origin \
+        "https://${GH_TOKEN}@github.com/${ORG_NAME}/${image_name}.git"
     git fetch origin
     git reset "origin/$branch" || git checkout -b "$branch"
     git add -A .
