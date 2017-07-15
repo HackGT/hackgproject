@@ -83,6 +83,34 @@ Switched to a new branch 'gh-pages'
 Just push and go to https://badger.static.hack.gt !
 ```
 
+## What will hackgproject do for you? (Usage)
+
+`hackgproject` only focuses on testing and building your project in a standard
+way to be used by other people, it will:
+
+1. Build and run `Dockerfile.build` if it exists
+   1. The repository will be mounted under `/src`.
+   2. Changes to `/src` will be visible in future steps.
+   2. Use this step if you need a lot of extra tools to build, but fewer to run.
+   
+2. Build and run `Dockerfile.test` if it exists.
+   1. Use this to run any kind of testing or checks for your app.
+   2. This step comes after `Dockerfile.build`.
+   
+3. For a `deployment` project, the main image (`Dockerfile`) will get built.
+   1. If the build succeeds and this is not a PR, it will publish the built
+      twice, once with tag being the SHA1 hash of the commit, and the other
+      with the tag `latest` or `latest-${branch name}` if not on `master`.
+      
+   2. After the image has been published a build of [biodomes](https://travis-ci.org/HackGT/biodomes) will be triggered.
+      Biodomes will take care of deployment, see the docs [other there](https://github.com/hackgt/biodomes) for more info.
+      
+4. For a `static` project, the source tree will be committed to `gh-pages` and
+   the DNS record will be set on cloudflare according to the `CNAME` file.
+   
+DO NOT EDIT the .travis.yml or the build script by hand!
+File a bug instead.
+
 ## Run your project!
 
 If you want to test how your project will be tested and built when uploaded,
