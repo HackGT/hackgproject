@@ -2,7 +2,7 @@
 # HACKGPROJECT VERSION: {{source_rev}}
 set -euo pipefail
 PROJECT_TYPE="{{project_type}}"
-ORG_NAME="HackGT"
+ORG_NAME="{{org_name}}"
 SOURCE_DIR=$(readlink -f "${BASH_SOURCE[0]}")
 SOURCE_DIR=$(dirname "$SOURCE_DIR")
 cd "${SOURCE_DIR}/.."

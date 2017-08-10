@@ -24,6 +24,9 @@ const TRAVIS_BUILD: Template =
 const TRAVIS_META: Template =
     (include_str!("../templates/travis.yml"), ".travis.yml", 0o664, true);
 
+const DEPLOYMENT_YAML: Template =
+    (include_str!("../templates/deployment.yaml"), "deployment.yaml", 0o664, false);
+
 const GITIGNORE: Template =
     (include_str!("../templates/gitignore"), ".gitignore", 0o664, false);
 
@@ -168,6 +171,7 @@ fn init_deployment() {
     let files = [
         TRAVIS_BUILD,
         TRAVIS_META,
+        DEPLOYMENT_YAML,
         GITIGNORE,
         LICENSE,
         README,
