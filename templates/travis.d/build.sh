@@ -48,14 +48,22 @@ build_project_container() {
 }
 
 git_branch() {
-    echo "${TRAVIS_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}"
+    if [[ ${TRAVIS_PULL_REQUEST_BRANCH} ]]; then
+        echo "${TRAVIS_PULL_REQUEST_BRANCH}"
+    else
+        echo "${TRAVIS_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}"
+    fi
+}
+
+git_branch_id() {
+    git_branch | sed 's/[^0-9a-zA-Z_-]/-/g'
 }
 
 publish_project_container() {
     local git_rev
     local branch
     git_rev=$(git rev-parse HEAD)
-    branch=$(git_branch)
+    branch=$(git_branch_id)
     local latest_tag_name="latest"
     local push_image_name="${DOCKER_ID_USER}/${image_name}"
     if [[ $branch != master ]]; then
@@ -153,15 +161,19 @@ github_list_comments() {
 }
 
 find_pr_number() {
-    curl "https://api.github.com/repos/${ORG_NAME}/${image_name}/pulls" \
-        | jq ".[] | select(.head.ref == \"$(git_branch)\") | .number"
+    if [[ ${TRAVIS_PULL_REQUEST} ]]; then
+        echo "${TRAVIS_PULL_REQUEST}"
+    else
+        curl "https://api.github.com/repos/${ORG_NAME}/${image_name}/pulls" \
+            | jq ".[] | select(.head.ref == \"$(git_branch)\") | .number"
+    fi
 }
 
 make_pr_deployment() {
     local app_domain
     local message
     local pr_id
-    app_domain="${image_name}-$(git_branch)"
+    app_domain="${image_name}-$(git_branch_id)"
     pr_id=$(find_pr_number)
     local test_url="https://${app_domain}.hack.gt"
 
