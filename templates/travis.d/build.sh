@@ -180,7 +180,7 @@ make_pr_deployment() {
 
     app_domain="${image_name}-$(git_branch_id)"
     pr_id=$(find_pr_number)
-    test_url="https://${app_domain}.hack.gt"
+    test_url="https://${app_domain}.pr.hack.gt"
     deployment_conf=$(cat <<-END
 git:
     remote: "https://github.com/${remote}"
