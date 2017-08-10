@@ -146,11 +146,13 @@ push_to_biodomes() {
 github_comment() {
     local body="$1"
     local pr_id="$2"
+    local data
+    data=$(jq -nMc "{body:\"${message}\"}")
 
     curl -X POST \
          -H 'Accept: application/vnd.github.v3+json' \
          -H "Authorization: token ${GH_TOKEN}" \
-         --data "{\"body\":\"${body}\"}" \
+         --data "${data}" \
          "https://api.github.com/repos/${ORG_NAME}/${image_name}/issues/${pr_id}/comments"
 }
 
@@ -185,8 +187,8 @@ make_pr_deployment() {
 END
     )
     message=$(cat <<-END
-        Hey y'all! A deployment of this PR can be found here:
-        ${test_url}
+Hey y'all! A deployment of this PR can be found here:
+${test_url}
 END
     )
 
