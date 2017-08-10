@@ -119,8 +119,8 @@ commit_to_branch() {
 }
 
 push_to_biodomes() {
-    local file="$1"
-    local path="$2"
+    local path="$1"
+    local file="$2"
 
     pushd "$(mktemp -d)"
     git clone --depth 1 "https://github.com/${ORG_NAME}/biodomes.git" .
@@ -130,7 +130,7 @@ push_to_biodomes() {
     git remote add origin \
         "https://${GH_TOKEN}@github.com/${ORG_NAME}/biodomes.git"
     mkdir -p "$(dirname "${path}")"
-    cat "$file" > "$path"
+    echo "$file" > "$path"
     git add -A .
     git status
 
@@ -173,17 +173,24 @@ make_pr_deployment() {
     local app_domain
     local message
     local pr_id
+    local test_url
+    local deployment_conf
+
     app_domain="${image_name}-$(git_branch_id)"
     pr_id=$(find_pr_number)
-    local test_url="https://${app_domain}.hack.gt"
-
+    test_url="https://${app_domain}.hack.gt"
+    deployment_conf=$(cat <<-END
+        git:
+            branch: "$(git_branch)"
+END
+    )
     message=$(cat <<-END
         Hey y'all! A deployment of this PR can be found here:
         ${test_url}
 END
     )
 
-    push_to_biodomes deployment.yaml "pr/${app_domain}.yaml"
+    push_to_biodomes "pr/${app_domain}.yaml" "${deployment_conf}"
 
     if ! github_list_comments "${pr_id}" | grep "${test_url}"; then
         github_comment "${message}" "${pr_id}"
