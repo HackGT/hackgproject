@@ -185,6 +185,8 @@ make_pr_deployment() {
 git:
     remote: "https://github.com/${remote}"
     branch: "$(git_branch)"
+
+secrets-source: git-${ORG_NAME}-${image_name}-secrets
 END
     )
     message=$(cat <<-END
