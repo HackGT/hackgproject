@@ -105,8 +105,8 @@ commit_to_branch() {
     local git_rev
     branch="${1:-gh-pages}"
     git_rev=$(git rev-parse --short HEAD)
-    git config user.name 'Michael Eden'
-    git config user.email 'themichaeleden@gmail.com'
+    git config user.name 'HackGBot'
+    git config user.email 'thehackgt@gmail.com'
     git remote remove origin
     git remote add origin \
         "https://${GH_TOKEN}@github.com/${ORG_NAME}/${image_name}.git"
@@ -124,8 +124,8 @@ push_to_biodomes() {
 
     pushd "$(mktemp -d)"
     git clone --depth 1 "https://github.com/${ORG_NAME}/biodomes.git" .
-    git config user.name 'Michael Eden'
-    git config user.email 'themichaeleden@gmail.com'
+    git config user.name 'HackGBot'
+    git config user.email 'thehackgt@gmail.com'
     git remote remove origin
     git remote add origin \
         "https://${GH_TOKEN}@github.com/${ORG_NAME}/biodomes.git"
