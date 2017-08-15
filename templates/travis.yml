@@ -13,5 +13,5 @@ env:
   global:
     - HACKGPROJECT_REV="{{source_rev}}"
 {{#use_docker}}
-    - DOCKER_ID_USER="{{org_name}}"
+    - DOCKER_ID_USER="{{docker_user}}"
 {{/use_docker}}

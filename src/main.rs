@@ -14,7 +14,8 @@ use rustache::{HashBuilder, Render};
 
 type Template = (&'static str, &'static str, u32, bool);
 
-const REPO: &'static str = "hackgt";
+const REPO: &'static str = "HackGT"; // IMPORTANT: Travis needs the right case here
+const DOCKER_USER: &'static str = "hackgt";
 const GIT_REV: &'static str = include_str!("../.git/refs/heads/master");
 const ROOT_DOMAIN: &'static str = "hack.gt";
 
@@ -156,6 +157,7 @@ fn init_static() {
     let data = HashBuilder::new()
         .insert("project_type", "static")
         .insert("use_docker", true)
+        .insert("docker_user", DOCKER_USER)
         .insert("org_name", REPO)
         .insert("namespace", "dev")
         .insert("root_domain", ROOT_DOMAIN)
@@ -184,6 +186,7 @@ fn init_deployment() {
     let data = HashBuilder::new()
         .insert("project_type", "deployment")
         .insert("use_docker", true)
+        .insert("docker_user", DOCKER_USER)
         .insert("org_name", REPO)
         .insert("namespace", "static")
         .insert("root_domain", ROOT_DOMAIN)
