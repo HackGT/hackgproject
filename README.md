@@ -2,7 +2,7 @@
 A CLI to create and manage projects that work with our infra.
 
 ```bash
-hackgproject 0.1.15
+hackgproject 0.1.16
 Michael Eden <themichaeleden@gmail.com>
 
 USAGE:
