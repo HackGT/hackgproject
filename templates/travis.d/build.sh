@@ -23,6 +23,7 @@ fi
 
 remote=$(git remote -v | grep -Pio "${ORG_NAME}"'/[a-zA-Z0-9-_\.]*' | head -1)
 image_name=$(basename "${remote%.*}")
+image_name=$(echo "$image_name" | tr '[:upper:]' '[:lower:]')
 
 build_project_source() {
     if [[ -f Dockerfile.build ]]; then
