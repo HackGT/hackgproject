@@ -37,3 +37,8 @@ server/config/questions\.schema\.d\.ts
 *.swp
 .#*
 
+# Ruby
+.travis.d/.bundle
+.travis.d/Gemfile.lock
+.travis.d/vendor
+

@@ -3,3 +3,8 @@ target/
 **/*.rs.bk
 .#*
 .nvimlog
+
+templates/travis.d/.bundle/
+templates/travis.d/Gemfile.lock
+templates/travis.d/vendor/
+

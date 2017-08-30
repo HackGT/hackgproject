@@ -1,4 +1,5 @@
 dist: trusty
+language: ruby
 
 {{#use_docker}}
 sudo: required
@@ -8,6 +9,8 @@ services:
 
 script:
   - .travis.d/build.sh
+  - cd .travis.d && bundle install --path vendor/bundle
+  - bundle exec ruby pr_autodeploy.rb
 
 env:
   global:

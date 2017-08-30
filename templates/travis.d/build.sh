@@ -92,15 +92,6 @@ trigger_biodomes_build() {
          https://api.travis-ci.org/repo/${ORG_NAME_CASE_PRESERVE}%2Fbiodomes/requests
 }
 
-install_jekyll() {
-    gem install jekyll
-    bundle install
-}
-
-build_jekyll() {
-    bundle exec jekyll build
-}
-
 commit_to_branch() {
     local branch
     local git_rev
@@ -117,90 +108,6 @@ commit_to_branch() {
     git status
     git commit -m "Automatic Travis deploy of ${git_rev}."
     git push -q origin "HEAD:${branch}"
-}
-
-push_to_biodomes() {
-    local path="$1"
-    local file="$2"
-
-    pushd "$(mktemp -d)"
-    git clone --depth 1 "https://github.com/${ORG_NAME}/biodomes.git" .
-    git config user.name 'HackGBot'
-    git config user.email 'thehackgt@gmail.com'
-    git remote remove origin
-    git remote add origin \
-        "https://${GH_TOKEN}@github.com/${ORG_NAME}/biodomes.git"
-    mkdir -p "$(dirname "${path}")"
-    echo "$file" > "$path"
-    git add -A .
-    git status
-
-    if git diff-index --quiet HEAD --; then
-        echo 'Nothing to commit, skipping biodomes push.'
-    else
-        git commit -m "Automatic deploy of ${image_name} to ${path}."
-        git push -q origin "HEAD:master"
-    fi
-    popd
-}
-
-github_comment() {
-    local body="$1"
-    local pr_id="$2"
-    local data
-    data=$(jq -nMc "{body:\"${message}\"}")
-
-    curl -X POST \
-         -H 'Accept: application/vnd.github.v3+json' \
-         -H "Authorization: token ${GH_TOKEN}" \
-         --data "${data}" \
-         "https://api.github.com/repos/${ORG_NAME}/${image_name}/issues/${pr_id}/comments"
-}
-
-github_list_comments() {
-    local pr_id="$1"
-    curl "https://api.github.com/repos/${ORG_NAME}/${image_name}/issues/${pr_id}/comments" \
-        | jq -r '.[].body'
-}
-
-find_pr_number() {
-    if [[ ${TRAVIS_PULL_REQUEST} ]]; then
-        echo "${TRAVIS_PULL_REQUEST}"
-    else
-        curl "https://api.github.com/repos/${ORG_NAME}/${image_name}/pulls" \
-            | jq ".[] | select(.head.ref == \"$(git_branch)\") | .number"
-    fi
-}
-
-make_pr_deployment() {
-    local app_domain
-    local message
-    local pr_id
-    local test_url
-    local deployment_conf
-
-    app_domain="${image_name}-$(git_branch_id)"
-    pr_id=$(find_pr_number)
-    test_url="https://${app_domain}.pr.hack.gt"
-    deployment_conf=$(cat <<-END
-git:
-    remote: "https://github.com/${remote}"
-    branch: "$(git_branch)"
-
-secrets-source: git-${ORG_NAME}-${image_name}-secrets
-END
-    )
-    message=$(cat <<-END
-Hey y'all! A deployment of this PR can be found here:
-${test_url}
-END
-    )
-
-    push_to_biodomes "pr/${app_domain}.yaml" "${deployment_conf}"
-
-    if ! github_list_comments "${pr_id}" | grep "${test_url}"; then
-        github_comment "${message}" "${pr_id}"
-    fi
 }
 
 set_cloudflare_dns() {

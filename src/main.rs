@@ -25,6 +25,13 @@ const TRAVIS_BUILD: Template =
 const TRAVIS_META: Template =
     (include_str!("../templates/travis.yml"), ".travis.yml", 0o664, true);
 
+const BUILD_GEMFILE: Template =
+    (include_str!("../templates/travis.d/Gemfile"), ".travis.d/Gemfile", 0o664, true);
+
+const PR_DEPLOY_RB: Template =
+    (include_str!("../templates/travis.d/pr_autodeploy.rb"),
+    ".travis.d/pr_autodeploy.rb", 0o664, true);
+
 const DEPLOYMENT_YAML: Template =
     (include_str!("../templates/deployment.yaml"), "deployment.yaml", 0o664, false);
 
@@ -173,6 +180,8 @@ fn init_deployment() {
     let files = [
         TRAVIS_BUILD,
         TRAVIS_META,
+        BUILD_GEMFILE,
+        PR_DEPLOY_RB,
         DEPLOYMENT_YAML,
         GITIGNORE,
         LICENSE,
