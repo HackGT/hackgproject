@@ -189,8 +189,6 @@ deployment_project() {
     if [[ ${TRAVIS_PULL_REQUEST:-} = false ]]; then
         publish_project_container
         trigger_biodomes_build
-    elif ! [[ ${TRAVIS_PULL_REQUEST_SLUG} =~ ^${ORG_NAME}/ ]]; then
-        make_pr_deployment
     fi
 }
 

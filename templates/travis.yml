@@ -7,10 +7,10 @@ services:
   - docker
 {{/use_docker}}
 
-script:
-  - .travis.d/build.sh
-  - cd .travis.d && bundle install --path vendor/bundle
-  - bundle exec ruby pr_autodeploy.rb
+script: |
+  .travis.d/build.sh &&
+  cd .travis.d && bundle install --path vendor/bundle &&
+  bundle exec ruby pr_autodeploy.rb
 
 env:
   global:
