@@ -50,7 +50,7 @@ def git_remote
 end
 
 def git_branch_id(branch)
-  branch.gsub(/[^0-9a-zA-Z_-]/, '-')
+  branch.gsub(/[^0-9a-zA-Z-]/, '-')
 end
 
 def pr_id(branch)
