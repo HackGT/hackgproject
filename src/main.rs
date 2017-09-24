@@ -50,6 +50,9 @@ const CNAME: Template =
 const INDEX_HTML: Template =
     (include_str!("../templates/index.html"), "index.html", 0o664, false);
 
+const DOCKERFILE: Template =
+    (include_str!("../templates/Dockerfile"), "Dockerfile", 0o664, false);
+
 fn main() {
     // get command line args
     let args_config = load_yaml!("args.yaml");
@@ -186,6 +189,7 @@ fn init_deployment() {
         GITIGNORE,
         LICENSE,
         README,
+        DOCKERFILE,
     ];
     let absolute_path = env::current_dir().unwrap();
     let basename = absolute_path.components()
