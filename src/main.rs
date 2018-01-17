@@ -51,13 +51,13 @@ const INDEX_HTML: Template =
     (include_str!("../templates/index.html"), "index.html", 0o664, false);
 
 const JEKYLL_DOCKERFILE: Template =
-    (include_str!("../templates/Dockerfile.jekyll"), "Dockerfile", 0o664, true);
+    (include_str!("../templates/jekyll/Dockerfile.jekyll"), "Dockerfile", 0o664, true);
 
 const JEKYLL_DOCKERFILE_BUILD: Template =
-    (include_str!("../templates/Dockerfile.build.jekyll"), "Dockerfile.build", 0o664, false);
+    (include_str!("../templates/jekyll/Dockerfile.build.jekyll"), "Dockerfile.build", 0o664, false);
 
 const JEKYLL_RUBY_HELPER: Template =
-    (include_str!("../templates/docker_resources/build.sh"), "docker_resources/build.sh", 0o664, false);
+    (include_str!("../templates/jekyll/docker_resources/build.sh"), "docker_resources/build.sh", 0o664, false);
 
 fn main() {
     // get command line args
