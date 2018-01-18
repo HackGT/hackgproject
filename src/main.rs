@@ -50,6 +50,15 @@ const CNAME: Template =
 const INDEX_HTML: Template =
     (include_str!("../templates/index.html"), "index.html", 0o664, false);
 
+const JEKYLL_DOCKERFILE: Template =
+    (include_str!("../templates/jekyll/Dockerfile.jekyll"), "Dockerfile", 0o664, true);
+
+const JEKYLL_DOCKERFILE_BUILD: Template =
+    (include_str!("../templates/jekyll/Dockerfile.build.jekyll"), "Dockerfile.build", 0o664, false);
+
+const JEKYLL_RUBY_HELPER: Template =
+    (include_str!("../templates/jekyll/docker_resources/build.sh"), "docker_resources/build.sh", 0o664, false);
+
 fn main() {
     // get command line args
     let args_config = load_yaml!("args.yaml");
@@ -125,7 +134,7 @@ fn init(matches: &ArgMatches, path: Option<&str>) {
     if matches.is_present("static") {
         init_static();
     } else if matches.is_present("jekyll") {
-        unimplemented!();
+        init_jekyll();
     } else if matches.is_present("node") {
         unimplemented!();
     } else {
@@ -202,6 +211,41 @@ fn init_deployment() {
         .insert("source_rev", GIT_REV.trim())
         .insert("app_name", format!("{}", basename))
         .insert("app_repo", format!("{}/{}", REPO, basename));
+
+    gen_files(&files, &data);
+}
+
+fn init_jekyll() {
+    println!("Creating a Docker deployment project with Jekyll!");
+    let files = [
+        TRAVIS_BUILD,
+        TRAVIS_META,
+        BUILD_GEMFILE,
+        PR_DEPLOY_RB,
+        DEPLOYMENT_YAML,
+        GITIGNORE,
+        LICENSE,
+        README,
+        JEKYLL_DOCKERFILE,
+        JEKYLL_RUBY_HELPER,
+        JEKYLL_DOCKERFILE_BUILD,
+    ];
+    let absolute_path = env::current_dir().unwrap();
+    let basename = absolute_path.components()
+        .last().unwrap().as_os_str().to_str().unwrap();
+
+    // add all the files:
+    let data = HashBuilder::new()
+        .insert("project_type", "deployment")
+        .insert("use_docker", true)
+        .insert("docker_user", DOCKER_USER)
+        .insert("org_name", REPO)
+        .insert("namespace", "static")
+        .insert("root_domain", ROOT_DOMAIN)
+        .insert("source_rev", GIT_REV.trim())
+        .insert("app_name", format!("{}", basename))
+        .insert("app_repo", format!("{}/{}", REPO, basename))
+        .insert("target_port", "target_port: 80");
 
     gen_files(&files, &data);
 }
