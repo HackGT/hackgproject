@@ -45,7 +45,7 @@ dependencies = [
 
 [[package]]
 name = "hackgproject"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "clap 2.25.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustache 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
