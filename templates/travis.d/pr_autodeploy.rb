@@ -57,12 +57,12 @@ def pr_id(branch)
   "#{git_remote}-#{git_branch_id branch}"
 end
 
-def create_biodome_file(branch)
+def create_biodome_file(branch, repo)
   remote = git_remote.downcase
   org = ORG_NAME.downcase
   data = <<~EOF
     git:
-        remote: "https://github.com/#{org}/#{remote}.git"
+        remote: "#{repo}"
         branch: "#{branch}"
 
     secrets-source: git-#{org}-#{remote}-secrets
@@ -88,6 +88,7 @@ def pr_digest(github, slug)
           {
             branch: p.head.ref,
             number: p.number
+            repo: p.head.repo.git_url
           }
         end
         .uniq
@@ -101,7 +102,7 @@ def main
 
   digest = pr_digest(github, slug)
   open_branches = digest.map { |pr| pr[:branch] }
-  files = open_branches.map { |branch| create_biodome_file(branch) }
+  files = open_branches.map { |pr| create_biodome_file(pr[:branch], pr[:repo]) }
 
   # commit all the right files to biodomes
   commit_to_biodomes do
